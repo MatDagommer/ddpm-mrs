@@ -20,16 +20,16 @@ def PRD(y, y_pred):
     return PRD
 
 
-def COS_SIM(y, y_pred):
-    cos_sim = []
-    y = np.squeeze(y, axis=-1)
-    y_pred = np.squeeze(y_pred, axis=-1)
-    for idx in range(len(y)):
-        kl_temp = cosine_similarity(y[idx].reshape(1, -1), y_pred[idx].reshape(1, -1))
-        cos_sim.append(kl_temp)
-
-    cos_sim = np.array(cos_sim)
-    return cos_sim
+# def COS_SIM(y, y_pred):
+#     cos_sim = []
+#     y = np.squeeze(y, axis=-1)
+#     y_pred = np.squeeze(y_pred, axis=-1)
+#     for idx in range(len(y)):
+#         kl_temp = cosine_similarity(y[idx].reshape(1, -1), y_pred[idx].reshape(1, -1))
+#         cos_sim.append(kl_temp)
+#
+#     cos_sim = np.array(cos_sim)
+#     return cos_sim
 
     
 def SNR(y1,y2):
