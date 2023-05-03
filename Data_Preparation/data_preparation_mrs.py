@@ -8,7 +8,7 @@ from sklearn.preprocessing import MinMaxScaler
 from torch.utils.data import DataLoader, Subset, ConcatDataset, TensorDataset
 
 
-def Data_Preparation(data_path):
+def Data_Preparation(data_path, n_channels=2):
 
     np.random.seed(1234)
 
@@ -86,14 +86,21 @@ def Data_Preparation(data_path):
     y_test = torch.FloatTensor(y_test)
     y_test = y_test.permute(0, 2, 1)
 
-    train_set = TensorDataset(X_train, y_train)
-    val_set = TensorDataset(X_val, y_val)
-    test_set = TensorDataset(X_test, y_test)
+    if n_channels == 2:
+        train_set = TensorDataset(X_train, y_train)
+        val_set = TensorDataset(X_val, y_val)
+        test_set = TensorDataset(X_test, y_test)
+        torch.save(train_set, os.path.join(data_path, "train_set.pt"))
+        torch.save(val_set, os.path.join(data_path, "val_set.pt"))
+        torch.save(test_set, os.path.join(data_path, "test_set.pt"))
 
+    elif n_channels == 1:
+        train_set = TensorDataset(X_train[:, 0:1], y_train[:, 0:1])
+        val_set = TensorDataset(X_val[:, 0:1], y_val[:, 0:1])
+        test_set = TensorDataset(X_test[:, 0:1], y_test[:, 0:1])
+        torch.save(train_set, os.path.join(data_path, "train_set_real.pt"))
+        torch.save(val_set, os.path.join(data_path, "val_set_real.pt"))
+        torch.save(test_set, os.path.join(data_path, "test_set_real.pt"))
     print("Dataset ready.")
-
-    torch.save(train_set, os.path.join(data_path, "train_set.pt"))
-    torch.save(val_set, os.path.join(data_path, "val_set.pt"))
-    torch.save(test_set, os.path.join(data_path, "test_set.pt"))
 
     return train_set, val_set, test_set

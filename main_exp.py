@@ -28,6 +28,7 @@ if __name__ == "__main__":
     parser.add_argument('--n_type', type=int, default=1, help='noise version')
     parser.add_argument('--d_folder', default=d_folder, help='data folder')
     parser.add_argument('--n_epochs', type=int, default=50, help='data folder')
+    parser.add_argument('--n_channels', type=int, default=2, help='number of channels. 1: real part only. 2: imaginary part only.')
     args = parser.parse_args()
     print(args)
 
@@ -43,14 +44,16 @@ if __name__ == "__main__":
     os.makedirs(foldername, exist_ok=True)
 
 
-    # train_set, val_set, test_set = Data_Preparation(data_path)
-    train_set = torch.load(os.path.join(data_path, "train_set.pt"))
-    val_set = torch.load(os.path.join(data_path, "val_set.pt"))
-    test_set = torch.load(os.path.join(data_path, "test_set.pt"))
-
-    # train_set = torch.load(os.path.join(data_path, "train_set_real.pt"))
-    # val_set = torch.load(os.path.join(data_path, "val_set_real.pt"))
-    # test_set = torch.load(os.path.join(data_path, "test_set_real.pt"))
+    train_set, val_set, test_set = Data_Preparation(data_path, n_channels=args.n_channels)
+    #
+    # if args.n_channels == 2:
+    #     train_set = torch.load(os.path.join(data_path, "train_set.pt"))
+    #     val_set = torch.load(os.path.join(data_path, "val_set.pt"))
+    #     test_set = torch.load(os.path.join(data_path, "test_set.pt"))
+    # elif args.n_channels == 1:
+    #     train_set = torch.load(os.path.join(data_path, "train_set_real.pt"))
+    #     val_set = torch.load(os.path.join(data_path, "val_set_real.pt"))
+    #     test_set = torch.load(os.path.join(data_path, "test_set_real.pt"))
 
     train_loader = DataLoader(train_set, batch_size=config['train']['batch_size'],
                               shuffle=True, drop_last=True, num_workers=0)
@@ -59,7 +62,7 @@ if __name__ == "__main__":
     
     # base_model = ConditionalModel(64,8,4).to(args.device)
     print("Initializing base model: ")
-    base_model = ConditionalModel(config['train']['feats'], config['train']['nchannels']).to(args.device)
+    base_model = ConditionalModel(config['train']['feats'], args.n_channels).to(args.device)
     print("Initializing DDPM: ")
     model = DDPM(base_model, config, args.device)
 
