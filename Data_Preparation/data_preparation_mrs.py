@@ -7,9 +7,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from torch.utils.data import DataLoader, Subset, ConcatDataset, TensorDataset
 
-data_path = "C:/Users/matth/Documents/Columbia/SAIL/data/"
+# data_path = "../../data/"
 
-def Data_Preparation():
+def Data_Preparation(data_path):
 
     np.random.seed(1234)
 

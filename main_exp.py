@@ -8,7 +8,7 @@ import os
 # TEST
 
 # from Data_Preparation.data_preparation import Data_Preparation
-# from Data_Preparation.data_preparation_mrs import Data_Preparation
+from Data_Preparation.data_preparation_mrs import Data_Preparation
 
 from main_model import DDPM
 from denoising_model_small import ConditionalModel
@@ -17,17 +17,24 @@ from utils import train, evaluate
 from torch.utils.data import DataLoader, Subset, ConcatDataset, TensorDataset
 
 from sklearn.model_selection import train_test_split
-data_path = "C:/Users/matth/Documents/Columbia/SAIL/data/"
+# data_path = "C:/Users/matth/Documents/Columbia/SAIL/data/"
 
-if __name__ == "__main__": 
+
+if __name__ == "__main__":
+    d_folder = os.getcwd()
+    print("d_folder: ", d_folder)
     parser = argparse.ArgumentParser(description="DDPM for ECG")
     parser.add_argument("--config", type=str, default="base.yaml")
     parser.add_argument('--device', default='cuda:0', help='Device')
     parser.add_argument('--name', default='test_0', help='name of model')
     parser.add_argument('--n_type', type=int, default=1, help='noise version')
+    parser.add_argument('--d_folder', default=d_folder, help='data folder')
     args = parser.parse_args()
     print(args)
-    
+
+    data_path = args.d_folder + "\data"
+    print("data path: ", data_path)
+
     path = "config/" + args.config
     with open(path, "r") as f:
         config = yaml.safe_load(f)
@@ -63,10 +70,10 @@ if __name__ == "__main__":
     # print("# of validation samples: ", len(val_idx))
 
     """New version"""
-    # train_set, val_set, test_set = Data_Preparation()
-    train_set = torch.load(os.path.join(data_path, "train_set.pt"))
-    val_set = torch.load(os.path.join(data_path, "val_set.pt"))
-    test_set = torch.load(os.path.join(data_path, "test_set.pt"))
+    train_set, val_set, test_set = Data_Preparation(data_path)
+    # train_set = torch.load(os.path.join(data_path, "train_set.pt"))
+    # val_set = torch.load(os.path.join(data_path, "val_set.pt"))
+    # test_set = torch.load(os.path.join(data_path, "test_set.pt"))
 
     # train_set = torch.load(os.path.join(data_path, "train_set_real.pt"))
     # val_set = torch.load(os.path.join(data_path, "val_set_real.pt"))
