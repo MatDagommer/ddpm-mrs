@@ -78,15 +78,15 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
     
 def evaluate(model, test_loader, shots, device, foldername=""):
     ssd_total = 0
-    mad_total = 0
-    prd_total = 0
-    cos_sim_total = 0
+    # mad_total = 0
+    # prd_total = 0
+    # cos_sim_total = 0
     psnr_total = 0
     gfc_total = 0
-    #pearson_total = 0
-    snr_noise = 0
-    snr_recon = 0
-    snr_improvement = 0
+    # pearson_total = 0
+    # snr_noise = 0
+    # snr_recon = 0
+    # snr_improvement = 0
     eval_points = 0
     
     restored_sig = []
@@ -111,29 +111,29 @@ def evaluate(model, test_loader, shots, device, foldername=""):
             
             eval_points += len(output)
             ssd_total += np.sum(metrics.SSD(clean_numpy, out_numpy))
-            mad_total += np.sum(metrics.MAD(clean_numpy, out_numpy))
-            prd_total += np.sum(metrics.PRD(clean_numpy, out_numpy))
+            # mad_total += np.sum(metrics.MAD(clean_numpy, out_numpy))
+            # prd_total += np.sum(metrics.PRD(clean_numpy, out_numpy))
             # cos_sim_total += np.sum(metrics.COS_SIM(clean_numpy, out_numpy))
-            snr_noise += np.sum(metrics.SNR(clean_numpy, noisy_numpy))
-            snr_recon += np.sum(metrics.SNR(clean_numpy, out_numpy))
-            snr_improvement += np.sum(metrics.SNR_improvement(noisy_numpy, out_numpy, clean_numpy))
+            # snr_noise += np.sum(metrics.SNR(clean_numpy, noisy_numpy))
+            # snr_recon += np.sum(metrics.SNR(clean_numpy, out_numpy))
+            # snr_improvement += np.sum(metrics.SNR_improvement(noisy_numpy, out_numpy, clean_numpy))
             psnr_total += np.sum(metrics.PSNR(clean_numpy, out_numpy))
             gfc_total += np.sum(metrics.computeGFC(clean_numpy, out_numpy))
-            #pearson_total += np.sum(metrics.computePearson(clean_numpy, out_numpy))
+            # pearson_total += np.sum(metrics.computePearson(clean_numpy, out_numpy))
             restored_sig.append(out_numpy)
             
             it.set_postfix(
                 ordered_dict={
                     "ssd_total": ssd_total/eval_points,
-                    "mad_total": mad_total/eval_points,
-                    "prd_total": prd_total/eval_points,
-                    "cos_sim_total": cos_sim_total/eval_points,
-                    "snr_in": snr_noise/eval_points,
-                    "snr_out": snr_recon/eval_points,
+                    # "mad_total": mad_total/eval_points,
+                    # "prd_total": prd_total/eval_points,
+                    # "cos_sim_total": cos_sim_total/eval_points,
+                    # "snr_in": snr_noise/eval_points,
+                    # "snr_out": snr_recon/eval_points,
                     "psnr_total": psnr_total / eval_points,
                     "gfc_total": gfc_total / eval_points,
-                    #"pearson_total": pearson_total / eval_points,
-                    "snr_improve": snr_improvement/eval_points,
+                    # "pearson_total": pearson_total / eval_points,
+                    # "snr_improve": snr_improvement/eval_points,
                 },
                 refresh=True,
             )
@@ -143,12 +143,12 @@ def evaluate(model, test_loader, shots, device, foldername=""):
     #np.save(foldername + '/denoised.npy', restored_sig)
     
     print("ssd_total: ",ssd_total/eval_points)
-    print("mad_total: ", mad_total/eval_points,)
-    print("prd_total: ", prd_total/eval_points,)
+    # print("mad_total: ", mad_total/eval_points,)
+    # print("prd_total: ", prd_total/eval_points,)
     #print("cos_sim_total: ", cos_sim_total/eval_points,)
-    print("snr_in: ", snr_noise/eval_points,)
-    print("snr_out: ", snr_recon/eval_points,)
-    print("snr_improve: ", snr_improvement/eval_points,)
+    # print("snr_in: ", snr_noise/eval_points,)
+    # print("snr_out: ", snr_recon/eval_points,)
+    # print("snr_improve: ", snr_improvement/eval_points,)
     print("psnr_total: ", psnr_total / eval_points, )
     print("gfc_total: ", gfc_total / eval_points, )
     #print("pearson_total: ", pearson_total / eval_points, )
