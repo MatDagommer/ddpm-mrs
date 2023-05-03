@@ -43,10 +43,10 @@ if __name__ == "__main__":
     os.makedirs(foldername, exist_ok=True)
 
 
-    train_set, val_set, test_set = Data_Preparation(data_path)
-    # train_set = torch.load(os.path.join(data_path, "train_set.pt"))
-    # val_set = torch.load(os.path.join(data_path, "val_set.pt"))
-    # test_set = torch.load(os.path.join(data_path, "test_set.pt"))
+    # train_set, val_set, test_set = Data_Preparation(data_path)
+    train_set = torch.load(os.path.join(data_path, "train_set.pt"))
+    val_set = torch.load(os.path.join(data_path, "val_set.pt"))
+    test_set = torch.load(os.path.join(data_path, "test_set.pt"))
 
     # train_set = torch.load(os.path.join(data_path, "train_set_real.pt"))
     # val_set = torch.load(os.path.join(data_path, "val_set_real.pt"))
@@ -63,10 +63,10 @@ if __name__ == "__main__":
     print("Initializing DDPM: ")
     model = DDPM(base_model, config, args.device)
 
-    print("starting Training: ")
-    train(model, config['train'], train_loader, args.device, 
-          valid_loader=val_loader, valid_epoch_interval=1, foldername=foldername,
-          n_epochs=args.n_epochs)
+    #print("starting Training: ")
+    #train(model, config['train'], train_loader, args.device,
+    #      valid_loader=val_loader, valid_epoch_interval=1, foldername=foldername,
+    #      n_epochs=args.n_epochs)
     
     # eval final
     print('eval final')
@@ -75,6 +75,7 @@ if __name__ == "__main__":
     # eval best
     print('eval best')
     # foldername = "./check_points/noise_type_" + str(1) + "/"
+    foldername = "./check_points/noise_type_1/"
     output_path = foldername + "/model.pth"
     model.load_state_dict(torch.load(output_path))
     evaluate(model, val_loader, 1, args.device, foldername=foldername)

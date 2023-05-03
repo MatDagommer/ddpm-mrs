@@ -1,5 +1,7 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+import torch
+import scipy
 
 def SSD(y, y_pred):
     return np.sum(np.square(y - y_pred), axis=1)  # axis 1 is the signal dimension
@@ -55,42 +57,33 @@ def SNR_improvement(y_in, y_out, y_clean):
 }
 """
 def computeGFC(groundTruth, recovered):
-    """
-    Compute Goodness-of-Fit Coefficient (GFC) between the recovered and the
-    corresponding ground-truth image
-    :param groundTruth: ground truth reference image.
-        numpy.ndarray (Height x Width x Spectral_Dimension)
-    :param recovered: image under evaluation.
-        numpy.ndarray (Height x Width x Spectral_Dimension)
-    Returns:
-        GFC between `recovered` and `groundTruth`
-    """
-    assert groundTruth.shape == recovered.shape, \
-        "Size not match for groundtruth and recovered spectral images"
-    #Slight modification made
-    groundTruth = torch.clip(groundTruth.view(-1).float(), 0, 1)
-    recovered = torch.clip(recovered.view(-1).float(), 0, 1)
 
-    GFCn = torch.sum(torch.multiply(groundTruth, recovered))
+    groundTruth[np.where(groundTruth > 1)] = 1
+    groundTruth[np.where(groundTruth < 0)] = 0
 
-    GFCd = torch.multiply(torch.sqrt(torch.sum(torch.pow(groundTruth, 2))),
-                       torch.sqrt(torch.sum(torch.pow(recovered, 2))))
+    recovered[np.where(recovered > 1)] = 1
+    recovered[np.where(recovered < 0)] = 0
 
-    GFC = torch.divide(GFCn, GFCd)
+    GFCn = np.sum(np.multiply(groundTruth, recovered))
+    GFCd = np.multiply(np.sqrt(np.sum(groundTruth**2)), np.sqrt(np.sum(recovered**2)))
+    GFC = np.divide(GFCn, GFCd)
 
-    return torch.mean(GFC).cpu().detach().item()
+    return GFC
 
 
 def PSNR(original, compressed):
-    mse = torch.mean((original.view(-1).float() - compressed.view(-1).float()) ** 2)
-    if (mse == 0):  # MSE is zero means no noise is present in the signal .
-        return 100  # Therefore PSNR have no importance.
 
-    psnr = 20 * torch.log10(torch.max(original.view(-1).float()) / torch.sqrt(mse))
+    mse = np.mean((original.reshape(-1) - compressed.reshape(-1))**2)
+    if mse == 0:
+        return 100
 
-    return psnr.cpu().detach().item()  # db
-    
-    
-    
-    
-    
+    psnr = 20 * np.log10(np.max(original.reshape(-1)) / np.sqrt(mse))
+    return psnr
+
+def computePearson(groundTruth, recovered):
+
+    groundTruth = np.nan_to_num(groundTruth)
+    recovered = np.nan_to_num(recovered)
+
+    batch_pearson = scipy.stats.pearsonr(recovered, groundTruth)
+    return batch_pearson
