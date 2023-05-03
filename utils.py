@@ -83,7 +83,7 @@ def evaluate(model, test_loader, shots, device, foldername=""):
     cos_sim_total = 0
     psnr_total = 0
     gfc_total = 0
-    pearson_total = 0
+    #pearson_total = 0
     snr_noise = 0
     snr_recon = 0
     snr_improvement = 0
@@ -119,7 +119,7 @@ def evaluate(model, test_loader, shots, device, foldername=""):
             snr_improvement += np.sum(metrics.SNR_improvement(noisy_numpy, out_numpy, clean_numpy))
             psnr_total += np.sum(metrics.PSNR(clean_numpy, out_numpy))
             gfc_total += np.sum(metrics.computeGFC(clean_numpy, out_numpy))
-            pearson_total += np.sum(metrics.computePearson(clean_numpy, out_numpy))
+            #pearson_total += np.sum(metrics.computePearson(clean_numpy, out_numpy))
             restored_sig.append(out_numpy)
             
             it.set_postfix(
@@ -132,7 +132,7 @@ def evaluate(model, test_loader, shots, device, foldername=""):
                     "snr_out": snr_recon/eval_points,
                     "psnr_total": psnr_total / eval_points,
                     "gfc_total": gfc_total / eval_points,
-                    "pearson_total": pearson_total / eval_points,
+                    #"pearson_total": pearson_total / eval_points,
                     "snr_improve": snr_improvement/eval_points,
                 },
                 refresh=True,
@@ -151,7 +151,7 @@ def evaluate(model, test_loader, shots, device, foldername=""):
     print("snr_improve: ", snr_improvement/eval_points,)
     print("psnr_total: ", psnr_total / eval_points, )
     print("gfc_total: ", gfc_total / eval_points, )
-    print("pearson_total: ", pearson_total / eval_points, )
+    #print("pearson_total: ", pearson_total / eval_points, )
     
     
     
