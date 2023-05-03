@@ -63,10 +63,10 @@ if __name__ == "__main__":
     print("Initializing DDPM: ")
     model = DDPM(base_model, config, args.device)
 
-    #print("starting Training: ")
-    #train(model, config['train'], train_loader, args.device,
-    #      valid_loader=val_loader, valid_epoch_interval=1, foldername=foldername,
-    #      n_epochs=args.n_epochs)
+    print("starting Training: ")
+    train(model, config['train'], train_loader, args.device,
+          valid_loader=val_loader, valid_epoch_interval=1, foldername=foldername,
+          n_epochs=args.n_epochs)
     
     # eval final
     print('eval final')
