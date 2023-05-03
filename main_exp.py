@@ -5,8 +5,6 @@ import json
 import yaml
 import os
 
-# TEST
-
 # from Data_Preparation.data_preparation import Data_Preparation
 from Data_Preparation.data_preparation_mrs import Data_Preparation
 
@@ -43,37 +41,12 @@ if __name__ == "__main__":
     foldername = args.name
     print('folder:', foldername)
     os.makedirs(foldername, exist_ok=True)
-    
-    """Replaced by Matthieu"""
-    # [X_train, y_train, X_test, y_test] = Data_Preparation(args.n_type)
-    #
-    # X_train = torch.FloatTensor(X_train)
-    # X_train = X_train.permute(0,2,1)
-    #
-    # y_train = torch.FloatTensor(y_train)
-    # y_train = y_train.permute(0,2,1)
-    #
-    # X_test = torch.FloatTensor(X_test)
-    # X_test = X_test.permute(0,2,1)
-    #
-    # y_test = torch.FloatTensor(y_test)
-    # y_test = y_test.permute(0,2,1)
-    #
-    # train_val_set = TensorDataset(y_train, X_train)
-    # test_set = TensorDataset(y_test, X_test)
-    #
-    # train_idx, val_idx = train_test_split(list(range(len(train_val_set))), test_size=0.3)
-    # train_set = Subset(train_val_set, train_idx)
-    # val_set = Subset(train_val_set, val_idx)
-    #
-    # print("# of train samples: ", len(train_idx))
-    # print("# of validation samples: ", len(val_idx))
 
-    """New version"""
-    train_set, val_set, test_set = Data_Preparation(data_path)
-    # train_set = torch.load(os.path.join(data_path, "train_set.pt"))
-    # val_set = torch.load(os.path.join(data_path, "val_set.pt"))
-    # test_set = torch.load(os.path.join(data_path, "test_set.pt"))
+
+    #train_set, val_set, test_set = Data_Preparation(data_path)
+    train_set = torch.load(os.path.join(data_path, "train_set.pt"))
+    val_set = torch.load(os.path.join(data_path, "val_set.pt"))
+    test_set = torch.load(os.path.join(data_path, "test_set.pt"))
 
     # train_set = torch.load(os.path.join(data_path, "train_set_real.pt"))
     # val_set = torch.load(os.path.join(data_path, "val_set_real.pt"))

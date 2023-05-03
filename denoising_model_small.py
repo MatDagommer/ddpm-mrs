@@ -136,6 +136,7 @@ class ConditionalModel(nn.Module):
     def forward(self, x, cond, noise_scale):
         noise_embed = self.embed(noise_scale)
         xs = []
+        print("Shape of input: ", x.size())
         for layer, br in zip(self.stream_x, self.bridge):
             x = layer(x)
             xs.append(br(x, noise_embed)) 
