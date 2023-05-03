@@ -82,8 +82,8 @@ def PSNR(original, compressed):
 
 def computePearson(groundTruth, recovered):
 
-    groundTruth = np.nan_to_num(groundTruth)
-    recovered = np.nan_to_num(recovered)
+    groundTruth = np.nan_to_num(groundTruth).reshape(-1)
+    recovered = np.nan_to_num(recovered).reshape(-1)
 
     batch_pearson = scipy.stats.pearsonr(recovered, groundTruth)
     return batch_pearson
