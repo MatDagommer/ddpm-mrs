@@ -75,7 +75,7 @@ if __name__ == "__main__":
     # eval best
     print('eval best')
     # foldername = "./check_points/noise_type_" + str(1) + "/"
-    foldername = "./check_points/noise_type_1/"
+    #foldername = "./check_points/noise_type_1/"
     output_path = foldername + "/model.pth"
     model.load_state_dict(torch.load(output_path))
     evaluate(model, val_loader, 1, args.device, foldername=foldername)
