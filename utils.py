@@ -6,7 +6,7 @@ import pickle
 import metrics
 from main_model import EMA
 
-def train(model, config, train_loader, device, valid_loader=None, valid_epoch_interval=5, foldername=""):
+def train(model, config, train_loader, device, valid_loader=None, valid_epoch_interval=5, foldername="", n_epochs=50):
     optimizer = Adam(model.parameters(), lr=config["lr"])
     #ema = EMA(0.9)
     #ema.register(model)
@@ -21,7 +21,8 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
     
     best_valid_loss = 1e10
     
-    for epoch_no in range(config["epochs"]):
+    # for epoch_no in range(config["epochs"]):
+    for epoch_no in range(n_epochs):
         avg_loss = 0
         model.train()
         

@@ -27,6 +27,7 @@ if __name__ == "__main__":
     parser.add_argument('--name', default='test_0', help='name of model')
     parser.add_argument('--n_type', type=int, default=1, help='noise version')
     parser.add_argument('--d_folder', default=d_folder, help='data folder')
+    parser.add_argument('--n_epochs', type=int, default=50, help='data folder')
     args = parser.parse_args()
     print(args)
 
@@ -37,7 +38,7 @@ if __name__ == "__main__":
         config = yaml.safe_load(f)
         
     # foldername = "./check_points/noise_type_" + str(args.n_type) + "/"
-    foldername = args.name
+    foldername = os.path.join("check_points", args.name)
     print('folder:', foldername)
     os.makedirs(foldername, exist_ok=True)
 
@@ -64,7 +65,8 @@ if __name__ == "__main__":
 
     print("starting Training: ")
     train(model, config['train'], train_loader, args.device, 
-          valid_loader=val_loader, valid_epoch_interval=1, foldername=foldername)
+          valid_loader=val_loader, valid_epoch_interval=1, foldername=foldername,
+          n_epochs=args.n_epochs)
     
     # eval final
     print('eval final')
@@ -72,7 +74,7 @@ if __name__ == "__main__":
     
     # eval best
     print('eval best')
-    foldername = "./check_points/noise_type_" + str(1) + "/"
+    # foldername = "./check_points/noise_type_" + str(1) + "/"
     output_path = foldername + "/model.pth"
     model.load_state_dict(torch.load(output_path))
     evaluate(model, val_loader, 1, args.device, foldername=foldername)
