@@ -30,8 +30,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     print(args)
 
-    data_path = args.d_folder + "\data"
-    print("data path: ", data_path)
+    data_path = os.path.join(args.d_folder, "data")
 
     path = "config/" + args.config
     with open(path, "r") as f:
