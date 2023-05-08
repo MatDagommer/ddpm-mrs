@@ -85,8 +85,8 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                     torch.save(model.state_dict(), output_path)
     
     torch.save(model.state_dict(), final_path)
-    np.save(os.path.join(folder_name, "train_losses.npy"), np.array(train_losses))
-    np.save(os.path.join(folder_name, "val_losses.npy"), np.array(val_losses))
+    np.save(os.path.join(foldername, "train_losses.npy"), np.array(train_losses))
+    np.save(os.path.join(foldername, "val_losses.npy"), np.array(val_losses))
     
 def evaluate(model, test_loader, shots, device, foldername=""):
     ssd_total = 0
