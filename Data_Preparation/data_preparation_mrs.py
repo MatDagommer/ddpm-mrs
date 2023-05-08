@@ -14,61 +14,66 @@ def Data_Preparation(data_path, n_channels=2):
 
     print("Loading raw data...")
     PH_invivoData = loadmat(os.path.join(data_path, "PH_InVivoData.mat"))
-
     FidsOFF = PH_invivoData['OFFdata']
 
-    FidsOFF_real = np.expand_dims(np.real(FidsOFF), axis=-1)
-    FidsOFF_img = np.expand_dims(np.imag(FidsOFF), axis=-1)
-    FidsOFF_amp = np.expand_dims(np.abs(FidsOFF), axis=-1)
+    SpectraOFF = np.zeros_like(FidsOFF)
 
-    repeat_ = np.expand_dims(np.repeat(FidsOFF_amp.max(axis=2), \
-                                       FidsOFF_amp.shape[2], axis=2), axis=-1)
+    for i in range(SpectraOFF.shape[1]):
+        for j in range(SpectraOFF.shape[2]):
+            SpectraOFF[:, i, j] = fftshift(fft(FidsOFF[:, i, j]))
 
-    # Normalizing by dividing by max amplitude
-    FidsOFF_real = np.divide(FidsOFF_real, repeat_)
-    FidsOFF_img = np.divide(FidsOFF_img, repeat_)
+    SpectraOFF_amp = np.abs(SpectraOFF)
 
-    FidsOFF = np.concatenate((FidsOFF_real, FidsOFF_img), axis=-1)
-    print("Check shape of FidsOFF: ")
-    print("FidsOFF shape: ", FidsOFF.shape)
-    # 2048 * 160 * 101 (duration * N_reps * N_subjects)
+    # Retrieve a maximum amplitude for each subject
+    MAX_VAL = np.max(SpectraOFF_amp, axis=1)
+    MAX_VAL = np.max(MAX_VAL, axis=0)
 
+    repeat_ = np.repeat(np.expand_dims(MAX_VAL, axis=-1), SpectraOFF.shape[0], axis=-1)
+    repeat_ = np.repeat(np.expand_dims(repeat_, axis=-1), SpectraOFF.shape[1], axis=-1)
 
-    patch_size = FidsOFF.shape[0]
-    N_reps = FidsOFF.shape[1]
-    N_subjects = FidsOFF.shape[2]
+    repeat_ = np.transpose(repeat_, (1, 2, 0))
+
+    SpectraOFF = np.divide(SpectraOFF, repeat_)
+
+    # SpectraOFF_avg [length x #subjects]
+    SpectraOFF_avg = np.mean(SpectraOFF, axis=1)
+
+    patch_size, N_acq, N_subjects = SpectraOFF.shape
     N_samples_per_subject = 100
-    N_channel = FidsOFF.shape[-1]
+    N_channels = 2
 
+    SpectraOFF_gt = np.zeros((N_subjects, N_samples_per_subject, patch_size, N_channels))
+    SpectraOFF_noisy = np.zeros((N_subjects, N_samples_per_subject, patch_size, N_channels))
 
-    FidsOFF_mean = np.mean(FidsOFF, axis=1) #.transpose()
-    print("Mean shape: ", FidsOFF_mean.shape)
-    FidsOFF_gt = np.zeros((N_subjects, N_samples_per_subject, patch_size, N_channel))
-    FidsOFF_noisy = np.zeros((N_subjects, N_samples_per_subject, patch_size, N_channel))
+    print("GT shape: ", SpectraOFF_gt.shape)
+    print("Noisy shape: ", SpectraOFF_noisy.shape)
 
-    print("GT shape: ", FidsOFF_gt.shape)
-    print("Noisy shape: ", FidsOFF_noisy.shape)
+    ratio_R = np.linspace(10, 60, N_samples_per_subject)
+    ratio_R = list(ratio_R)
+    ratio_R = [int(i) for i in ratio_R]
 
     print("Starting dataset generation...")
     for i in tqdm(range(N_subjects)):
         for j in range(N_samples_per_subject):
-            n_averages = np.random.randint(1, N_reps//2)
-            sample_idx = np.arange(0, N_reps)
+            sample_idx = np.random.randint(0, N_acq, N_acq // ratio_R[j])
             np.random.shuffle(sample_idx)
-            sample_idx = sample_idx[:n_averages]
-            FidsOFF_gt[i, j] = FidsOFF_mean[:, i]
-            FidsOFF_noisy[i, j] = np.mean(FidsOFF[:, sample_idx, i], axis=1)
+
+            SpectraOFF_gt[i, j, :, 0] = np.real(SpectraOFF_avg[:, i])
+            SpectraOFF_gt[i, j, :, 1] = np.imag(SpectraOFF_avg[:, i])
+
+            SpectraOFF_noisy[i, j, :, 0] = np.real(np.mean(SpectraOFF[:, sample_idx, i], axis=1))
+            SpectraOFF_noisy[i, j, :, 1] = np.imag(np.mean(SpectraOFF[:, sample_idx, i], axis=1))
 
     train_idx, val_idx = train_test_split(range(N_subjects), test_size=0.4)
     val_idx, test_idx = train_test_split(val_idx, test_size=0.5)
 
-    X_train = FidsOFF_noisy[train_idx].reshape(-1, patch_size, N_channel)
-    X_val = FidsOFF_noisy[val_idx].reshape(-1, patch_size, N_channel)
-    X_test = FidsOFF_noisy[test_idx].reshape(-1, patch_size, N_channel)
+    X_train = SpectraOFF_noisy[train_idx].reshape(-1, patch_size, N_channels)
+    X_val = SpectraOFF_noisy[val_idx].reshape(-1, patch_size, N_channels)
+    X_test = SpectraOFF_noisy[test_idx].reshape(-1, patch_size, N_channels)
 
-    y_train = FidsOFF_gt[train_idx].reshape(-1, patch_size, N_channel)
-    y_val = FidsOFF_gt[val_idx].reshape(-1, patch_size, N_channel)
-    y_test = FidsOFF_gt[test_idx].reshape(-1, patch_size, N_channel)
+    y_train = SpectraOFF_gt[train_idx].reshape(-1, patch_size, N_channels)
+    y_val = SpectraOFF_gt[val_idx].reshape(-1, patch_size, N_channels)
+    y_test = SpectraOFF_gt[test_idx].reshape(-1, patch_size, N_channels)
 
     print("Converting data to tensors...")
     X_train = torch.FloatTensor(X_train)
@@ -85,6 +90,15 @@ def Data_Preparation(data_path, n_channels=2):
     X_test = X_test.permute(0, 2, 1)
     y_test = torch.FloatTensor(y_test)
     y_test = y_test.permute(0, 2, 1)
+
+    # train_set = TensorDataset(X_train, y_train)
+    # val_set = TensorDataset(X_val, y_val)
+    # test_set = TensorDataset(X_test, y_test)
+    # torch.save(train_set, os.path.join(data_path, "train_set.pt"))
+    # torch.save(val_set, os.path.join(data_path, "val_set.pt"))
+    # torch.save(test_set, os.path.join(data_path, "test_set.pt"))
+
+    print("Done.")
 
     if n_channels == 2:
         train_set = TensorDataset(X_train, y_train)
