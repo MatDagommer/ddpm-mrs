@@ -59,11 +59,12 @@ def Data_Preparation(data_path, n_channels=2):
             sample_idx = np.random.randint(0, N_acq, N_acq // ratio_R[j])
             np.random.shuffle(sample_idx)
 
-            SpectraOFF_gt[i, j, :, 0] = np.real(SpectraOFF_avg[:, i])
-            SpectraOFF_gt[i, j, :, 1] = np.imag(SpectraOFF_avg[:, i])
-
             SpectraOFF_noisy[i, j, :, 0] = np.real(np.mean(SpectraOFF[:, sample_idx, i], axis=1))
             SpectraOFF_noisy[i, j, :, 1] = np.imag(np.mean(SpectraOFF[:, sample_idx, i], axis=1))
+
+            SpectraOFF_gt[i, j, :, 0] = SpectraOFF_noisy[i, j, :, 0] - np.real(SpectraOFF_avg[:, i])
+            SpectraOFF_gt[i, j, :, 1] = SpectraOFF_noisy[i, j, :, 0] - np.imag(SpectraOFF_avg[:, i])
+
 
     train_idx, val_idx = train_test_split(range(N_subjects), test_size=0.4)
     val_idx, test_idx = train_test_split(val_idx, test_size=0.5)
