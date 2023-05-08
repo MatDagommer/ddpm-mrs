@@ -4,13 +4,17 @@ from torch.optim import Adam
 from tqdm import tqdm
 import pickle
 import metrics
+import os
 from main_model import EMA
 
 def train(model, config, train_loader, device, valid_loader=None, valid_epoch_interval=5, foldername="", n_epochs=50):
     optimizer = Adam(model.parameters(), lr=config["lr"])
     #ema = EMA(0.9)
     #ema.register(model)
-    
+
+    train_losses = []
+    val_losses = []
+
     if foldername != "":
         output_path = foldername + "/model.pth"
         final_path = foldername + "/final.pth"
@@ -47,6 +51,9 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                     },
                     refresh=True,
                 )
+
+                if batch_no == it.total:
+                    train_losses.append(avg_loss / batch_no)
             
             lr_scheduler.step()
             
@@ -66,6 +73,9 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                             },
                             refresh=True,
                         )
+
+                        if batch_no == it.total:
+                            val_losses.append(avg_loss_valid / batch_no)
             
             if best_valid_loss > avg_loss_valid/batch_no:
                 best_valid_loss = avg_loss_valid/batch_no
@@ -74,7 +84,9 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                 if foldername != "":
                     torch.save(model.state_dict(), output_path)
     
-    torch.save(model.state_dict(), final_path)        
+    torch.save(model.state_dict(), final_path)
+    np.save(os.path.join(final_path, "train_losses.npy"), np.array(train_losses))
+    np.save(os.path.join(final_path, "val_losses.npy"), np.array(val_losses))
     
 def evaluate(model, test_loader, shots, device, foldername=""):
     ssd_total = 0
