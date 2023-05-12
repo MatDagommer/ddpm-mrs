@@ -17,13 +17,15 @@ from torch.utils.data import DataLoader, Subset, ConcatDataset, TensorDataset
 from sklearn.model_selection import train_test_split
 # data_path = "C:/Users/matth/Documents/Columbia/SAIL/data/"
 
+# need to add models
 
 if __name__ == "__main__":
     d_folder = os.getcwd()
     print("d_folder: ", d_folder)
     parser = argparse.ArgumentParser(description="DDPM for ECG")
-    parser.add_argument("--config", type=str, default="base.yaml")
+    #parser.add_argument("--config", type=str, default="base.yaml")
     parser.add_argument('--device', default='cuda:0', help='Device')
+    parser.add_argument('--device', default='cpu', help='Device')
     parser.add_argument('--name', default='test_0', help='name of model')
     parser.add_argument('--n_type', type=int, default=1, help='noise version')
     parser.add_argument('--d_folder', default=d_folder, help='data folder')
