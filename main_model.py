@@ -198,7 +198,7 @@ class DDPM(nn.Module):
             (1 - continuous_sqrt_alpha_cumprod**2).sqrt() * noise
         )
     
-    def p_losses(self, x_in, y_in, noise=None):
+    def p_losses(self, y_in, x_in, noise=None): # inverted x_in and y_in to match the dataset
         #x_in: clean signal
         #y_in: noisy signal as condition
         x_start = x_in
