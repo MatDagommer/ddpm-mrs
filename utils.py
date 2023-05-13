@@ -122,6 +122,7 @@ def evaluate(model, test_loader, shots, device, foldername=""):
             
             
             eval_points += len(output)
+            print("eval points: ", eval_points)
             ssd_total += np.sum(metrics.SSD(clean_numpy, out_numpy))
             mad_total += np.sum(metrics.MAD(clean_numpy, out_numpy))
             # prd_total += np.sum(metrics.PRD(clean_numpy, out_numpy))
