@@ -8,7 +8,7 @@ import os
 # from Data_Preparation.data_preparation import Data_Preparation
 from Data_Preparation.data_preparation_mrs import Data_Preparation
 
-from main_model import DDPM
+from main_model import DDPM, UNet, LSTMModel
 from denoising_model_small import ConditionalModel
 from utils import train, evaluate
 
@@ -23,14 +23,15 @@ if __name__ == "__main__":
     d_folder = os.getcwd()
     print("d_folder: ", d_folder)
     parser = argparse.ArgumentParser(description="DDPM for ECG")
-    #parser.add_argument("--config", type=str, default="base.yaml")
-    parser.add_argument('--device', default='cuda:0', help='Device')
+    parser.add_argument("--config", type=str, default="base.yaml")
+    # parser.add_argument('--device', default='cuda:0', help='Device')
     parser.add_argument('--device', default='cpu', help='Device')
     parser.add_argument('--name', default='test_0', help='name of model')
     parser.add_argument('--n_type', type=int, default=1, help='noise version')
     parser.add_argument('--d_folder', default=d_folder, help='data folder')
     parser.add_argument('--n_epochs', type=int, default=50, help='data folder')
     parser.add_argument('--n_channels', type=int, default=2, help='number of channels. 1: real part only. 2: imaginary part only.')
+    parser.add_argument('--modeltype', default='ddpm', help='Model architecture: ddpm, unet, lstm')
     args = parser.parse_args()
     print(args)
 
@@ -65,8 +66,20 @@ if __name__ == "__main__":
     # base_model = ConditionalModel(64,8,4).to(args.device)
     print("Initializing base model: ")
     base_model = ConditionalModel(config['train']['feats'], args.n_channels).to(args.device)
-    print("Initializing DDPM: ")
-    model = DDPM(base_model, config, args.device)
+    
+    if args.modeltype == "ddpm":
+        print("Initializing DDPM: ")
+        model = DDPM(base_model, config, args.device)
+    elif args.modeltype == "unet":
+        print("Initialize UNet: ")
+        name = "unet"
+        nchannels = 2
+        nout = 2
+        model = UNet(name, nchannels, nout)
+    elif args.modeltype == "lstm":
+        print("Initialize LSTM: ")
+        model = LSTMModel(base_model, config, args.device)
+        
 
     print("starting Training: ")
     train(model, config['train'], train_loader, args.device,
@@ -74,8 +87,8 @@ if __name__ == "__main__":
           n_epochs=args.n_epochs)
     
     # eval final
-    print('eval final')
-    evaluate(model, val_loader, 1, args.device, foldername=foldername)
+    #print('eval final')
+    #evaluate(model, val_loader, 1, args.device, foldername=foldername)
     
     # eval best
     print('eval best')
@@ -86,5 +99,5 @@ if __name__ == "__main__":
     evaluate(model, val_loader, 1, args.device, foldername=foldername)
     
     # don't use before final model is determined
-    print('eval test')
-    evaluate(model, test_loader, 1, args.device, foldername=foldername)
+    #print('eval test')
+    #evaluate(model, test_loader, 1, args.device, foldername=foldername)
