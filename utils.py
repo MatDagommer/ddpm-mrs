@@ -30,6 +30,7 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
     # for epoch_no in range(config["epochs"]):
     for epoch_no in range(n_epochs):
         avg_loss = 0
+        avg_snr = 0
         model.train()
         
         with tqdm(train_loader) as it:
