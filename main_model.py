@@ -261,3 +261,173 @@ class EMA(object):
 
     def load_state_dict(self, state_dict):
         self.shadow = state_dict
+        
+# UNET 
+
+KERNEL_SIZE = 3
+P = (KERNEL_SIZE - 1)//2
+
+######################################## Double Convolution
+class DoubleConv(nn.Module):
+    """(convolution => [BN] => ReLU) * 2"""
+
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.double_conv = nn.Sequential(
+            nn.Conv1d(in_channels, out_channels, kernel_size=KERNEL_SIZE, padding=P, padding_mode = 'replicate'),
+            nn.BatchNorm1d(out_channels),
+            nn.ReLU(inplace=True),
+            nn.Conv1d(out_channels, out_channels, kernel_size=KERNEL_SIZE, padding=P, padding_mode = 'replicate'),
+            nn.BatchNorm1d(out_channels),
+            nn.ReLU(inplace=True)
+        )
+
+    def forward(self, x):
+        return self.double_conv(x)
+
+######################################## Maxpooling followed by Double Convolution
+class Down(nn.Module):
+    """Downscaling with maxpool then double conv"""
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.maxpool_conv = nn.Sequential(
+            nn.MaxPool1d(2),
+            DoubleConv(in_channels, out_channels)
+        )
+
+    def forward(self, x):
+        return self.maxpool_conv(x)
+    
+######################################## Upsampling followed by Double Convolution
+class Up(nn.Module):
+    """Upscaling then double conv"""
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        self.up_conv = nn.Sequential(
+            nn.Upsample(scale_factor=2, mode='linear', align_corners=True),
+            nn.Conv1d(in_channels, out_channels, kernel_size=KERNEL_SIZE, padding=P, padding_mode = 'replicate'),
+        ) 
+
+        self.conv = DoubleConv(out_channels * 2, out_channels)
+
+    def forward(self, x1, x2):
+        x1 = self.up_conv(x1)
+        x = torch.cat([x1, x2], dim=1)
+        x = self.conv(x)
+        return x
+
+######################################## Output layer (1x1 Convolution followed by SoftMax activation)
+class OutConv(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(OutConv, self).__init__()
+        self.conv_sigmoid = nn.Sequential(
+            nn.Conv1d(in_channels, out_channels, kernel_size=1),
+        )
+
+    def forward(self, x):
+        return self.conv_sigmoid(x)
+
+
+
+class UNet(nn.Module):
+
+    def __init__(self, name, n_channels, n_out):
+        super(UNet, self).__init__()
+        self.name = name
+        self.n_channels = n_channels
+        self.n_out = n_out
+
+        self.inputL = DoubleConv(n_channels, 64)
+        self.down1 = Down(64, 128)
+        self.down2 = Down(128, 256)
+        self.down3 = Down(256, 512)
+        self.down4 = Down(512, 512)
+        self.down5 = Down(512, 1024)
+        
+        self.up1 = Up(1024, 512)
+        self.up2 = Up(512, 512)
+        self.up3 = Up(512, 256)
+        self.up4 = Up(256, 128)
+        self.up5 = Up(128, 64)
+        self.outputL = OutConv(64, n_out)
+        
+    def forward(self, x):
+        x1 = self.inputL(x)
+        
+        x2 = self.down1(x1)
+        x3 = self.down2(x2)
+        x4 = self.down3(x3)
+        x5 = self.down4(x4)
+        b = self.down5(x5)
+        
+        x = self.up1(b, x5)
+        x = self.up2(x, x4)
+        x = self.up3(x, x3)
+        x = self.up4(x, x2)
+        x = self.up5(x, x1)
+        
+        x = self.outputL(x)
+        
+        return x
+    
+class CNNModel(nn.Module):
+    '''ConvNet -> Max_Pool -> RELU -> ConvNet -> Max_Pool -> -> RELU -> FID'''
+    def __init__(self, name):
+        '''Define model modules.'''
+
+        super(CNNModel, self).__init__()
+        self.name = name
+        # in_num, out_num, kernel_size, stride, padding
+        self.conv1 = nn.Conv1d(1, 2, 128, 1, 64)
+        self.bn1 = nn.BatchNorm1d(num_features=2)
+        self.conv2 = nn.Conv1d(2, 4, 128, 1, 64)
+        self.bn2 = nn.BatchNorm1d(num_features=4)
+        self.conv3 = nn.Conv1d(4, 8, 128, 1, 64)
+        self.bn3 = nn.BatchNorm1d(num_features=8)
+        self.conv4 = nn.Conv1d(8, 16, 128, 1, 64)
+        self.bn4 = nn.BatchNorm1d(num_features=16)
+        self.fc1 = nn.Linear(128 * 1 * 16, 1024)
+        self.fc2 = nn.Linear(1024, 512)
+        self.fc3 = nn.Linear(512, 2048)
+
+    def forward(self, x):
+        '''Define the model architecture (the sequence to place the model modules).'''
+
+        x = F.relu(self.bn1(self.conv1(x)))
+        x = F.max_pool1d(x, 2, 2)
+        x = F.relu(self.bn2(self.conv2(x)))
+        x = F.max_pool1d(x, 2, 2)
+        x = F.relu(self.bn3(self.conv3(x)))
+        x = F.max_pool1d(x, 2, 2)
+        x = F.relu(self.bn4(self.conv4(x)))
+        x = F.max_pool1d(x, 2, 2)
+        x = x.view(-1, 128 * 1 * 16)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+    
+    
+class LSTMModel(nn.Module):
+    def __init__(self, name, in_dim = 2048, hidden_dim = 2048, out_size = 2048):
+        super(LSTMModel, self).__init__()
+        self.hidden_dim = hidden_dim
+        self.name = name
+
+        # The LSTM takes word embeddings as inputs, and outputs hidden states
+        # with dimensionality hidden_dim.
+        self.lstm = nn.LSTM(in_dim, hidden_dim, batch_first = True)
+
+        # The linear layer that maps from hidden state space to tag space
+        self.fc = nn.Linear(hidden_dim, out_size)
+
+    def forward(self, x):
+        x, (hn, cn) = self.lstm(x)
+        #print(x.size())
+        x = x.view(-1, 2048)
+        x = self.fc(x)
+
+        return x.view(-1, 1, 2048)
+    
+    
+
