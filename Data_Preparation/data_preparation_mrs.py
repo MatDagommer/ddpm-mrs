@@ -61,9 +61,14 @@ def Data_Preparation(data_path, n_channels=2):
 
             SpectraOFF_noisy[i, j, :, 0] = np.real(np.mean(SpectraOFF[:, sample_idx, i], axis=1))
             SpectraOFF_noisy[i, j, :, 1] = np.imag(np.mean(SpectraOFF[:, sample_idx, i], axis=1))
-
-            SpectraOFF_gt[i, j, :, 0] = SpectraOFF_noisy[i, j, :, 0] - np.real(SpectraOFF_avg[:, i])
-            SpectraOFF_gt[i, j, :, 1] = SpectraOFF_noisy[i, j, :, 0] - np.imag(SpectraOFF_avg[:, i])
+            
+            # Noise as a Target
+            #SpectraOFF_gt[i, j, :, 0] = SpectraOFF_noisy[i, j, :, 0] - np.real(SpectraOFF_avg[:, i])
+            #SpectraOFF_gt[i, j, :, 1] = SpectraOFF_noisy[i, j, :, 0] - np.imag(SpectraOFF_avg[:, i])
+            
+            # Clean Spectrum as a target
+            SpectraOFF_gt[i, j, :, 0] = np.real(SpectraOFF_avg[:, i])
+            SpectraOFF_gt[i, j, :, 1] = np.imag(SpectraOFF_avg[:, i])
 
 
     train_idx, val_idx = train_test_split(range(N_subjects), test_size=0.4)

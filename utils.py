@@ -7,10 +7,11 @@ import metrics
 import os
 from main_model import EMA
 
-def train(model, config, train_loader, device, valid_loader=None, valid_epoch_interval=5, foldername="", n_epochs=50):
+def train(model, config, train_loader, device, valid_loader=None, valid_epoch_interval=5, foldername="", n_epochs=50, patience=7):
     optimizer = Adam(model.parameters(), lr=config["lr"])
     #ema = EMA(0.9)
     #ema.register(model)
+    patience_count = 0
 
     train_losses = []
     val_losses = []
@@ -31,7 +32,7 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
         model.train()
         
         with tqdm(train_loader) as it:
-            for batch_no, (clean_batch, noisy_batch) in enumerate(it, start=1):
+            for batch_no, (noisy_batch, clean_batch) in enumerate(it, start=1):
                 clean_batch, noisy_batch = clean_batch.to(device), noisy_batch.to(device)
                 optimizer.zero_grad()
                 #print("clean batch size: ", clean_batch.size())
@@ -74,9 +75,17 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                             refresh=True,
                         )
 
-                        if batch_no == it.total:
+                        if batch_no == it.total:  
                             val_losses.append(avg_loss_valid / batch_no)
+                    
+            if val_losses[-1] >= val_losses[-2]:
+                patience_count += 1
+            else:
+                patience_count = 0
             
+            if patience_count == patience:
+                break
+                    
             if best_valid_loss > avg_loss_valid/batch_no:
                 best_valid_loss = avg_loss_valid/batch_no
                 print("\n best loss is updated to ",avg_loss_valid / batch_no,"at", epoch_no,)
