@@ -47,7 +47,13 @@ if __name__ == "__main__":
     os.makedirs(foldername, exist_ok=True)
 
 
-    train_set, val_set, test_set = Data_Preparation(data_path, n_channels=args.n_channels)
+    if os.path.exists(os.path.join(data_path, "train_set.pt")):
+        train_set = torch.load(os.path.join(data_path, "train_set.pt"))
+        val_set = torch.load(os.path.join(data_path, "val_set.pt"))
+        test_set = torch.load(os.path.join(data_path, "test_set.pt"))
+        print("Data Loaded.")
+    else:
+        train_set, val_set, test_set = Data_Preparation(data_path, n_channels=args.n_channels)
     #
     # if args.n_channels == 2:
     #     train_set = torch.load(os.path.join(data_path, "train_set.pt"))
