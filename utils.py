@@ -12,6 +12,7 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
     #ema = EMA(0.9)
     #ema.register(model)
     patience_count = 0
+    prev_loss = 100_000
 
     train_losses = []
     val_losses = []
@@ -77,11 +78,12 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
 
                         if batch_no == it.total:  
                             val_losses.append(avg_loss_valid / batch_no)
-                    
-            if val_losses[-1] >= val_losses[-2]:
+            
+            if val_losses[-1] >= prev_loss:
                 patience_count += 1
             else:
                 patience_count = 0
+                prev_loss = val_losses[-1]
             
             if patience_count == patience:
                 break
