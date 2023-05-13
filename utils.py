@@ -4,6 +4,7 @@ from torch.optim import Adam
 from tqdm import tqdm
 import pickle
 import metrics
+from metrics import PSNR_tensor
 import os
 from main_model import EMA
 
