@@ -37,8 +37,8 @@ def SNR(y1,y2):
     print("y2 shape: ", y2.shape)
     #N = np.sum(np.abs(y1), axis=1)
     #D = np.sum(np.square(y2 - y1), axis=1)
-    D = np.square(y2 - y1)
-    N = np.zeros_like(D) + np.
+    D = np.sum(np.square(y2 - y1), axis=1)
+    N = np.zeros_like(D) + np.max(np.abs(y1), axis = 1)
     SNR = 20*np.log10(np.divide(N,D))
     print("SNR shape: ", SNR.shape)
     
