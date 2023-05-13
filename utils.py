@@ -45,10 +45,13 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                 avg_loss += loss.item()
                 
                 #ema.update(model)
+                with torch.no_grad():
+                    avg_snr += PSNR_tensor(clean_batch, noisy_batch)
                 
                 it.set_postfix(
                     ordered_dict={
-                        "avg_epoch_loss": avg_loss / batch_no,
+                        "avg_epoch_loss (L1)": avg_loss / batch_no,
+                        "avg_epoch_snr": avg_snr / batch_no,
                         "epoch": epoch_no,
                     },
                     refresh=True,

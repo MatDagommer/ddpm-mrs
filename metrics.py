@@ -84,6 +84,23 @@ def PSNR(original, compressed):
     psnr = 20 * np.log10(np.max(original.reshape(-1)) / np.sqrt(mse))
     return psnr
 
+
+def PSNR_tensor(original, compressed):
+    original = original.squeeze()
+    compressed = compressed.squeeze()
+    batch_size = original.size()[0]
+
+    psnr = 0
+    for i in range(batch_size):
+      mse = torch.abs(torch.mean((original[i] - compressed[i]) ** 2))
+      if(mse == 0):  # MSE is zero means no noise is present in the signal .
+          return 100 # Therefore PSNR have no importance.
+    
+      psnr += 20 * torch.log10(torch.max(torch.abs(original[i])) / torch.sqrt(mse))
+    
+    return psnr.cpu().detach().item()/ batch_size # db
+
+
 def computePearson(groundTruth, recovered):
 
     groundTruth = np.nan_to_num(groundTruth).reshape(-1)
