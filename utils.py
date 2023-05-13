@@ -48,7 +48,8 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                 
                 #ema.update(model)
                 with torch.no_grad():
-                    avg_snr += PSNR_tensor(clean_batch, noisy_batch)
+                    denoised_batch = model.denoising(noisy_batch)
+                    avg_snr += PSNR_tensor(denoised_batch, denoised_batch)
                 
                 it.set_postfix(
                     ordered_dict={
