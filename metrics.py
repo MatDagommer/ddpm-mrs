@@ -33,6 +33,10 @@ def PRD(y, y_pred):
 
     
 def SNR(y1,y2):
+    if type(y1)==torch.Tensor:
+        y1 = y1.cpu().numpy()
+    if type(y2)==torch.Tensor:
+        y2 = y2.cpu().numpy()
     print("y1 shape: ", y1.shape)
     print("y2 shape: ", y2.shape)
     #N = np.sum(np.abs(y1), axis=1)
