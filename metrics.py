@@ -37,18 +37,14 @@ def SNR(y1,y2):
         y1 = y1.cpu().numpy()
     if type(y2)==torch.Tensor:
         y2 = y2.cpu().numpy()
-    #print("y1 shape: ", y1.shape)
-    #print("y2 shape: ", y2.shape)
-    #N = np.sum(np.abs(y1), axis=1)
-    #D = np.sum(np.square(y2 - y1), axis=1)
-    #D = np.std(y2 - y1, axis=-1)
+
     D = np.sum(np.square(y2 - y1), axis=-1) / y1.shape[-1]
     D = np.sqrt(D)
     N = np.zeros_like(D) + np.max(np.abs(y2), axis=-1)
+    print("max y1: ", np.max(y1))
+    print("max y2: ", np.max(y2))
     SNR = 20*np.log10(np.divide(N,D))
-    #print("SNR shape: ", SNR.shape)
     real_SNR = np.sum(SNR[:,0]) / y1.shape[0]
-    #img_SNR=np.sum(SNR[:,1])
     return real_SNR
     
 def SNR_improvement(y_in, y_out, y_clean):
