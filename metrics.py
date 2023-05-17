@@ -42,12 +42,12 @@ def SNR(y1,y2):
     #N = np.sum(np.abs(y1), axis=1)
     #D = np.sum(np.square(y2 - y1), axis=1)
     D = np.sum(np.square(y2 - y1), axis=-1)
-    N = np.zeros_like(D) + np.max(np.abs(y1), axis=-1)
+    N = np.zeros_like(D) + np.max(np.abs(y2), axis=-1)
     SNR = 20*np.log10(np.divide(N,D))
     print("SNR shape: ", SNR.shape)
-    #real_SNR=np.sum(SNR[:,0])
-    #real_SNR=np.sum(SNR[:,1])
-    return np.sum(SNR)
+    real_SNR=np.sum(SNR[:,0])
+    #img_SNR=np.sum(SNR[:,1])
+    return real_SNR
     
 def SNR_improvement(y_in, y_out, y_clean):
     return SNR(y_clean, y_out)-SNR(y_clean, y_in)
