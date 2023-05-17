@@ -47,14 +47,11 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                 avg_loss += loss.item()
                 
                 #ema.update(model)
-                with torch.no_grad():
-                    denoised_batch = model.denoising(noisy_batch)
-                    avg_snr += PSNR_tensor(denoised_batch, denoised_batch)
                 
                 it.set_postfix(
                     ordered_dict={
                         "avg_epoch_loss (L1)": avg_loss / batch_no,
-                        "avg_epoch_snr": avg_snr / batch_no,
+                        # "avg_epoch_snr": avg_snr / batch_no,
                         "epoch": epoch_no,
                     },
                     refresh=True,
@@ -74,9 +71,14 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                         clean_batch, noisy_batch = clean_batch.to(device), noisy_batch.to(device)
                         loss = model(clean_batch, noisy_batch)
                         avg_loss_valid += loss.item()
+
+                        denoised_batch = model.denoising(noisy_batch)
+                        avg_snr += PSNR_tensor(denoised_batch, noisy_batch)
+
                         it.set_postfix(
                             ordered_dict={
                                 "valid_avg_epoch_loss": avg_loss_valid / batch_no,
+                                "avg_epoch_snr": avg_snr / batch_no,
                                 "epoch": epoch_no,
                             },
                             refresh=True,
