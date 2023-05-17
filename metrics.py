@@ -41,11 +41,13 @@ def SNR(y1,y2):
     #print("y2 shape: ", y2.shape)
     #N = np.sum(np.abs(y1), axis=1)
     #D = np.sum(np.square(y2 - y1), axis=1)
-    D = np.std(y2 - y1, axis=-1)
+    #D = np.std(y2 - y1, axis=-1)
+    D = np.sum(np.square(y2 - y1), axis=-1) / y1.shape[-1]
+    D = np.sqrt(D)
     N = np.zeros_like(D) + np.max(np.abs(y2), axis=-1)
     SNR = 20*np.log10(np.divide(N,D))
-    print("SNR shape: ", SNR.shape)
-    real_SNR=np.sum(SNR[:,0])
+    #print("SNR shape: ", SNR.shape)
+    real_SNR = np.sum(SNR[:,0]) / y1.shape[0]
     #img_SNR=np.sum(SNR[:,1])
     return real_SNR
     
