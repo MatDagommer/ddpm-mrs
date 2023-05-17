@@ -5,7 +5,6 @@ import json
 import yaml
 import os
 
-# petite modif 
 # from Data_Preparation.data_preparation import Data_Preparation
 from Data_Preparation.data_preparation_mrs import Data_Preparation
 
@@ -33,6 +32,7 @@ if __name__ == "__main__":
     parser.add_argument('--n_epochs', type=int, default=50, help='data folder')
     parser.add_argument('--n_channels', type=int, default=2, help='number of channels. 1: real part only. 2: imaginary part only.')
     parser.add_argument('--modeltype', default='ddpm', help='Model architecture: ddpm, unet, lstm')
+    parser.add_argument('--newdata', default=False, action='store_true', help='overwrite dataset')
     args = parser.parse_args()
     print(args)
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     os.makedirs(foldername, exist_ok=True)
 
 
-    if os.path.exists(os.path.join(data_path, "train_set.pt")):
+    if os.path.exists(os.path.join(data_path, "train_set.pt")) and args.newdata==False:
         train_set = torch.load(os.path.join(data_path, "train_set.pt"))
         val_set = torch.load(os.path.join(data_path, "val_set.pt"))
         test_set = torch.load(os.path.join(data_path, "test_set.pt"))

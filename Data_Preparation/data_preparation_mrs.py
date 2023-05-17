@@ -18,7 +18,7 @@ def Data_Preparation(data_path, n_channels=2):
     FidsOFF = PH_invivoData['OFFdata']
 
     SpectraOFF = np.zeros_like(FidsOFF)
-
+ 
     for i in range(SpectraOFF.shape[1]):
         for j in range(SpectraOFF.shape[2]):
             SpectraOFF[:, i, j] = fftshift(fft(FidsOFF[:, i, j]))
