@@ -4,7 +4,6 @@ from torch.optim import Adam
 from tqdm import tqdm
 import pickle
 import metrics
-from metrics import PSNR_tensor
 import os
 from main_model import EMA
 
@@ -31,7 +30,6 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
     # for epoch_no in range(config["epochs"]):
     for epoch_no in range(n_epochs):
         avg_loss = 0
-        avg_snr = 0
         model.train()
         
         with tqdm(train_loader) as it:
@@ -65,6 +63,9 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
         if valid_loader is not None and (epoch_no + 1) % valid_epoch_interval == 0:
             model.eval()
             avg_loss_valid = 0
+            denoised_snr = 0
+            noisy_snr = 0
+
             with torch.no_grad():
                 with tqdm(valid_loader) as it:
                     for batch_no, (clean_batch, noisy_batch) in enumerate(it, start=1):
@@ -73,12 +74,16 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                         avg_loss_valid += loss.item()
 
                         denoised_batch = model.denoising(noisy_batch)
-                        avg_snr += PSNR_tensor(denoised_batch, noisy_batch)
+                        #avg_snr += PSNR_tensor(denoised_batch, noisy_batch)
+                        denoised_snr += metrics.SNR(denoised_batch, clean_batch)
+                        noisy_snr += metrics.SNR(noisy_batch, clean_batch)
 
                         it.set_postfix(
                             ordered_dict={
                                 "valid_avg_epoch_loss": avg_loss_valid / batch_no,
-                                "avg_epoch_snr": avg_snr / batch_no,
+                                # "avg_epoch_snr": avg_snr / batch_no,
+                                "denoised_snr": denoised_snr / batch_no,
+                                "noisy_snr":  noisy_snr / batch_no,
                                 "epoch": epoch_no,
                             },
                             refresh=True,
