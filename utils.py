@@ -73,7 +73,7 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                         loss = model(clean_batch, noisy_batch)
                         avg_loss_valid += loss.item()
 
-                        denoised_batch = model.denoising(noisy_batch)
+                        denoised_batch = model.denoise_signal(clean_batch, noisy_batch)
                         #avg_snr += PSNR_tensor(denoised_batch, noisy_batch)
                         denoised_snr += metrics.SNR(denoised_batch, clean_batch)
                         noisy_snr += metrics.SNR(noisy_batch, clean_batch)

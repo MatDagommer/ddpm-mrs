@@ -226,6 +226,34 @@ class DDPM(nn.Module):
         loss = self.loss_func(noise, x_recon)
         return loss
     
+    def denoise_signal(self, x_in, y_in, noise=None):
+        #x_in: clean signal
+        #y_in: noisy signal as condition
+        x_start = x_in
+        B,C,L = x_start.shape
+        t = np.random.randint(1, self.num_steps + 1)
+        continuous_sqrt_alpha_cumprod = torch.FloatTensor(
+            np.random.uniform(
+                self.sqrt_alphas_cumprod_prev[t-1],
+                self.sqrt_alphas_cumprod_prev[t],
+                size=B
+            )
+        ).to(x_start.device)
+        continuous_sqrt_alpha_cumprod = continuous_sqrt_alpha_cumprod.view(
+            B, -1)
+
+        noise = default(noise, lambda: torch.randn_like(x_start))
+        x_noisy = self.q_sample(
+            x_start=x_start, continuous_sqrt_alpha_cumprod=continuous_sqrt_alpha_cumprod.view(-1, 1, 1), noise=noise)
+
+        if not self.conditional:
+            x_recon = self.model(x_noisy, continuous_sqrt_alpha_cumprod)
+        else:
+            x_recon = self.model(x_noisy, y_in, continuous_sqrt_alpha_cumprod)
+
+        return y_in - x_recon
+
+
     def forward(self, x, y, *args, **kwargs):
         return self.p_losses(x, y, *args, **kwargs)
     
