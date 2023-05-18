@@ -249,6 +249,8 @@ class DDPM(nn.Module):
             B, -1)
 
         noise = default(noise, lambda: torch.randn_like(x_start))
+        noise = noise / 4
+        
         x_noisy = self.q_sample(
             x_start=x_start, continuous_sqrt_alpha_cumprod=continuous_sqrt_alpha_cumprod.view(-1, 1, 1), noise=noise)
 
