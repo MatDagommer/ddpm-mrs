@@ -288,7 +288,7 @@ class DDPM(nn.Module):
         print("x_recon size: ", x_recon.size())
         alpha_temp = torch.ones(B,C,L)
         for i in range(B):
-            alpha_temp[i,:,:] += continuous_sqrt_alpha_cumprod[i,0]
+            alpha_temp[i,:,:] += continuous_sqrt_alpha_cumprod[i,0].to(x_start.device)
         x_denoised = (y_in - (1 - alpha_temp**2)*x_recon) / alpha_temp
 
         return x_denoised
