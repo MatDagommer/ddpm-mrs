@@ -41,8 +41,10 @@ def SNR(y1,y2):
     D = np.sum(np.square(y2 - y1), axis=-1) / y1.shape[-1]
     D = np.sqrt(D)
     N = np.zeros_like(D) + np.max(np.abs(y2), axis=-1)
-    print("noisy. min: ", np.min(y1), " max: ", np.max(y1))
-    print("clean. min: ", np.min(y2), " max: ", np.max(y2))
+    
+    # print("noisy. min: ", np.min(y1), " max: ", np.max(y1))
+    # print("clean. min: ", np.min(y2), " max: ", np.max(y2))
+    
     SNR = 20*np.log10(np.divide(N,D))
     real_SNR = np.sum(SNR[:,0]) / y1.shape[0]
     return real_SNR
