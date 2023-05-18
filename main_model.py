@@ -283,6 +283,9 @@ class DDPM(nn.Module):
         else:
             x_recon = self.model(x_noisy, y_in, continuous_sqrt_alpha_cumprod)
 
+        print("y_in.size: ", y_in.size())
+        print("continuous_sqrt_alpha_cumprod size: ", continuous_sqrt_alpha_cumprod.shape)
+        print("x_recon size: ", x_recon.size())
         x_denoised = (y_in - (1 - continuous_sqrt_alpha_cumprod**2)*x_recon) / continuous_sqrt_alpha_cumprod
 
         return x_denoised
