@@ -57,11 +57,11 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
 
                 if batch_no == it.total:
                     train_losses.append(avg_loss / batch_no)
-                    with torch.no_grad():
-                        predicted_noise = model.retrieve_noise(clean_batch, noisy_batch).cpu().numpy()
-                        actual_noise = (noisy_batch - clean_batch).cpu().numpy()
-                        print("predicted noise. min: ", np.min(predicted_noise), ". max: ", np.max(predicted_noise))
-                        print("actual noise. min: ", np.min(actual_noise), ". max: ", np.max(actual_noise))                         
+                    # with torch.no_grad():
+                    #     predicted_noise = model.retrieve_noise(clean_batch, noisy_batch).cpu().numpy()
+                    #     actual_noise = (noisy_batch - clean_batch).cpu().numpy()
+                    #     print("predicted noise. min: ", np.min(predicted_noise), ". max: ", np.max(predicted_noise))
+                    #     print("actual noise. min: ", np.min(actual_noise), ". max: ", np.max(actual_noise))                         
             
             lr_scheduler.step()
             
@@ -79,14 +79,13 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                         avg_loss_valid += loss.item()
 
                         denoised_batch = model.denoise_signal(clean_batch, noisy_batch)
-                        #avg_snr += PSNR_tensor(denoised_batch, noisy_batch)
+                        
                         denoised_snr += metrics.SNR(denoised_batch, clean_batch)
                         noisy_snr += metrics.SNR(noisy_batch, clean_batch)
 
                         it.set_postfix(
                             ordered_dict={
                                 "valid_avg_epoch_loss": avg_loss_valid / batch_no,
-                                # "avg_epoch_snr": avg_snr / batch_no,
                                 "denoised_snr": denoised_snr / batch_no,
                                 "noisy_snr":  noisy_snr / batch_no,
                                 "epoch": epoch_no,

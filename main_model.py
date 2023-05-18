@@ -283,7 +283,9 @@ class DDPM(nn.Module):
         else:
             x_recon = self.model(x_noisy, y_in, continuous_sqrt_alpha_cumprod)
 
-        return y_in - x_recon
+        x_denoised = (y_in - (1 - continuous_sqrt_alpha_cumprod**2)*x_recon) / continuous_sqrt_alpha_cumprod
+
+        return x_denoised
 
 
     def forward(self, x, y, *args, **kwargs):
