@@ -282,7 +282,7 @@ class DDPM(nn.Module):
 
         noise = default(noise, lambda: torch.randn_like(x_start))
         noise = noise / 4
-        
+
         x_noisy = self.q_sample(
             x_start=x_start, continuous_sqrt_alpha_cumprod=continuous_sqrt_alpha_cumprod.view(-1, 1, 1), noise=noise)
 
@@ -291,9 +291,9 @@ class DDPM(nn.Module):
         else:
             x_recon = self.model(x_noisy, y_in, continuous_sqrt_alpha_cumprod)
 
-        print("y_in.size: ", y_in.size())
-        print("continuous_sqrt_alpha_cumprod size: ", continuous_sqrt_alpha_cumprod.shape)
-        print("x_recon size: ", x_recon.size())
+        # print("y_in.size: ", y_in.size())
+        # print("continuous_sqrt_alpha_cumprod size: ", continuous_sqrt_alpha_cumprod.shape)
+        # print("x_recon size: ", x_recon.size())
         alpha_temp = torch.ones(B,C,L).to(x_start.device)
         for i in range(B):
             alpha_temp[i,:,:] += continuous_sqrt_alpha_cumprod[i,0]
