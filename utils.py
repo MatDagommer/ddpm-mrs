@@ -60,8 +60,8 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
                     with torch.no_grad():
                         predicted_noise = model.retrieve_noise(clean_batch, noisy_batch).cpu().numpy()
                         actual_noise = (noisy_batch - clean_batch).cpu().numpy()
-                        print("max predicted noise: ", np.max(predicted_noise))
-                        print("max actual noise: ", np.max(actual_noise))                        
+                        print("predicted noise. min: ", np.min(predicted_noise), ". max: ", np.max(predicted_noise))
+                        print("actual noise. min: ", np.min(actual_noise), ". max: ", np.max(actual_noise))                         
             
             lr_scheduler.step()
             
