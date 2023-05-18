@@ -57,6 +57,11 @@ def train(model, config, train_loader, device, valid_loader=None, valid_epoch_in
 
                 if batch_no == it.total:
                     train_losses.append(avg_loss / batch_no)
+                    with torch.no_grad():
+                        predicted_noise = model.retrieve_noise(clean_batch, noisy_batch).cpu().numpy()
+                        actual_noise = (noisy_batch - clean_batch).cpu().numpy()
+                        print("max predicted noise: ", np.max(predicted_noise))
+                        print("max actual noise: ", np.max(actual_noise))                        
             
             lr_scheduler.step()
             
